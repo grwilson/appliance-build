@@ -149,3 +149,103 @@ console and perform any post-boot verification that's required (e.g.
 verify certain packages are installed, etc).
 
 To exit "qemu", one can use "Ctrl-A X".
+
+## Creating new build variants and new roles
+
+This repository contains different build variants which are used to
+generate customized images and leverage different ansible roles to customize
+those variants. The following instructions can be used to create a new
+build variant and roles.
+
+### Step 1. Create and populate the ansible role directory
+
+The new variant that you're planning to create may need some additional
+customized roles. To do so you will need to create the role[s] that the
+variant needs to execute. These roles are located in the
+"live-build/misc/ansible-roles" directory and follow the ansible
+role directory structure (i.e. tasks, handlers, files, etc.)
+
+Create a new directory or directories for the role[s] you will need
+for your variant. In this example, we will create "appliance-build.dcenter"
+to match the name of our variant that we plan to create:
+
+    $ mkdir live-build/misc/ansible-roles/appliance-build.dcenter
+
+With the toplevel directory created, we can populate the directory structure
+with any tasks, files, handlers, templates, etc. In our example, we only
+need "files" and "tasks":
+
+    $ ls -l live-build/misc/ansible-roles/appliance-build.dcenter
+    total 0
+    drwxr-xr-x  3 root  root   96 Jun 19 19:17 files
+    drwxr-xr-x  4 root  root  128 Jun 19 19:17 tasks
+
+There are many roles that exist in "live-build/misc/ansible-roles" and can
+serve as good examples.
+
+### Step 2. Create the new variant directory structure
+
+The different variants are located in the "live-build/variants" directory:
+
+    $ ls -l live-build/variants
+    total 0
+    drwxr-xr-x  5 root  root  160 Jun  4 22:56 external-standard
+    drwxr-xr-x  5 root  root  160 Jun  4 22:56 internal-dev
+    drwxr-xr-x  5 root  root  160 Jun  4 22:56 internal-minimal
+    drwxr-xr-x  5 root  root  160 Jun  4 22:56 internal-qa
+
+This is where you will need to create a new directory to contain your new
+variant. Note that the naming convention is "internal" or "external" following
+by a "-" and then the name of your variant. In this example we are going to
+create a "dcenter" variant:
+
+    $ mkdir live-build/variants/internal-dcenter
+    $ mkdir live-build/variants/internal-dcenter/ansible
+    $ mkdir live-build/variants/internal-dcenter/config
+
+### Step 3. Create the variant configuration
+
+The "ansible" directory will contain the ansible playbook which will
+define which roles are required when building your new variant. For this
+example, we've copied another playbook and added our newly
+customized "appliance-build.dcenter" role:
+
+    ---
+    - hosts: all
+      connection: chroot
+      gather_facts: no
+      vars:
+        ansible_python_interpreter: /usr/bin/python2
+      roles:
+        - appliance-build.minimal-common
+        - appliance-build.minimal-internal
+        - appliance-build.install-delphix-zfs-packages
+        - appliance-build.zfsonlinux-development
+        - appliance-build.masking-common
+        - appliance-build.masking-development
+        - appliance-build.virtualization-common
+        - appliance-build.virtualization-internal
+        - appliance-build.virtualization-standard
+        - appliance-build.virtualization-development
+        - appliance-build.zfsonlinux-development
+        - appliance-build.dcenter
+
+Along with the "playbook.yml" file, we need to create a link to the location
+for the "roles" that will be used by this playbook. This directory where
+we created our customized role[s] in step #1:
+
+    $ ls -l live-build/variants/internal-dcenter/ansible/roles
+    lrwxr-xr-x  1 root  root  27 Jun 19 19:17 live-build/variants/internal-dcenter/ansible/roles -> ../../../misc/ansible-roles
+
+The "hooks" directory will define the order of the build and the steps
+that need to be executed when creating the new variant. Again we create
+a link to the common list of hooks to leverage code reuse:
+
+    $ ls -l live-build/variants/internal-dcenter/config/hooks
+    lrwxr-xr-x  1 root  root  30 Jun 19 19:17 live-build/variants/internal-dcenter/config/hooks -> ../../../misc/live-build-hooks
+
+### Step 4. Build the variant
+
+See the instructions above to setup your build environment and kick off the
+build:
+    $ ./scripts/docker-run.sh make internal-dcenter

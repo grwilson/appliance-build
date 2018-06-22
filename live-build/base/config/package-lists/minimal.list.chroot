@@ -42,3 +42,4 @@ open-vm-tools
 openssh-server
 ubuntu-minimal
 auditd
+python2.7

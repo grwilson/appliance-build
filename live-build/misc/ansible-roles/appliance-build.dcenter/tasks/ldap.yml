@@ -1,0 +1,70 @@
+#
+# Copyright (c) 2018 by Delphix. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+---
+
+# Adapted from:
+#   * https://help.ubuntu.com/community/AutofsLDAP
+#   * https://www.digitalocean.com/community/tutorials/how-to-authenticate-client-computers-using-ldap-on-an-ubuntu-12-04-vps
+
+- name: Ubuntu Linux LDAP Access | Install LDAP OS Packages
+  apt:
+    name={{ item }}
+    state=present
+  with_items:
+    - autofs-ldap
+    - ldap-utils
+    - libpam-ldap
+    - nfs-common
+    - nscd
+
+- name: Ubuntu Linux LDAP Access | Drop in configuration files to /etc/...
+  copy:
+    src=etc/
+    dest=/etc/
+    owner=root
+    group=root
+    mode=0444
+
+- name: Ubuntu Linux LDAP Access | Set autofs LDAP URI
+  lineinfile:
+    dest=/etc/default/autofs
+    regexp='^LDAP_URI='
+    line='LDAP_URI="ldap://ldap.delphix.com"'
+
+- name: Ubuntu Linux LDAP Access | Add ldap to /etc/nsswitch.conf
+  lineinfile:
+    dest=/etc/nsswitch.conf
+    regexp="{{ item.regexp }}"
+    line="{{ item.line }}"
+  with_items:
+    - { regexp: "^automount:.*$", line: "automount:\tfiles ldap" }
+    - { regexp: "^group:.*$", line: "group:\tcompat ldap" }
+    - { regexp: "^passwd:.*$", line: "passwd:\tcompat ldap" }
+    - { regexp: "^shadow:.*$", line: "shadow:\tcompat ldap" }
+
+- name: Ubuntu Linux LDAP Access | Ensure ldap-home exists
+  file:
+    path="{{ dlpx_ldap_home_path | default('/home') }}"
+    state=directory
+    owner=root
+    group=root
+    mode=0755
+
+- name: Ubuntu Linux LDAP Access | Setup ldap-home in /etc/auto.master
+  lineinfile:
+    dest=/etc/auto.master
+    line="{{ dlpx_ldap_home_path | default('/home') }}    auto_home    -nobrowse"
