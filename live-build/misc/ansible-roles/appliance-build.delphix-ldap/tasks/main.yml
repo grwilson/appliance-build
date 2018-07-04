@@ -20,10 +20,9 @@
 #   * https://help.ubuntu.com/community/AutofsLDAP
 #   * https://www.digitalocean.com/community/tutorials/how-to-authenticate-client-computers-using-ldap-on-an-ubuntu-12-04-vps
 
-- name: Ubuntu Linux LDAP Access | Install LDAP OS Packages
-  apt:
-    name={{ item }}
-    state=present
+- apt:
+    name: "{{ item }}"
+    state: present
   with_items:
     - autofs-ldap
     - ldap-utils
@@ -31,40 +30,35 @@
     - nfs-common
     - nscd
 
-- name: Ubuntu Linux LDAP Access | Drop in configuration files to /etc/...
-  copy:
-    src=etc/
-    dest=/etc/
-    owner=root
-    group=root
-    mode=0444
+- copy:
+    src: etc/
+    dest: /etc/
+    owner: root
+    group: root
+    mode: 0444
 
-- name: Ubuntu Linux LDAP Access | Set autofs LDAP URI
-  lineinfile:
-    dest=/etc/default/autofs
-    regexp='^LDAP_URI='
-    line='LDAP_URI="ldap://ldap.delphix.com"'
+- lineinfile:
+    dest: etc/default/autofs
+    regexp: '^LDAP_URI='
+    line: 'LDAP_URI="ldap://ldap.delphix.com"'
 
-- name: Ubuntu Linux LDAP Access | Add ldap to /etc/nsswitch.conf
-  lineinfile:
-    dest=/etc/nsswitch.conf
-    regexp="{{ item.regexp }}"
-    line="{{ item.line }}"
+- lineinfile:
+    dest: /etc/nsswitch.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
   with_items:
     - { regexp: "^automount:.*$", line: "automount:\tfiles ldap" }
     - { regexp: "^group:.*$", line: "group:\tcompat ldap" }
     - { regexp: "^passwd:.*$", line: "passwd:\tcompat ldap" }
     - { regexp: "^shadow:.*$", line: "shadow:\tcompat ldap" }
 
-- name: Ubuntu Linux LDAP Access | Ensure ldap-home exists
-  file:
-    path="{{ dlpx_ldap_home_path | default('/home') }}"
-    state=directory
-    owner=root
-    group=root
-    mode=0755
+- file:
+    path: /home
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
 
-- name: Ubuntu Linux LDAP Access | Setup ldap-home in /etc/auto.master
-  lineinfile:
-    dest=/etc/auto.master
-    line="{{ dlpx_ldap_home_path | default('/home') }}    auto_home    -nobrowse"
+- lineinfile:
+    dest: etc/auto.master
+    line: "/home   auto_home    -nobrowse"

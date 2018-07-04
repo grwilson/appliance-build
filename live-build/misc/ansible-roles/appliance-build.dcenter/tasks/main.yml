@@ -15,59 +15,52 @@
 #
 
 ---
-- include: ldap.yml
 
 - apt:
     name: "{{ item }}"
     state: present
   with_items:
-    - python-pip
-    - libldap2-dev
-    - libsasl2-dev
-    - isc-dhcp-server
     - bind9
     - dnsutils
+    - git
+    - isc-dhcp-server
+    - libldap2-dev
+    - libsasl2-dev
+    - nfs-kernel-server
+    - python-ldap
+    - python-paramiko
+    - python-pip
+    - python-requests
+    - python2.7
     - telnet
   register: result
   until: result is not failed
   retries: 3
   delay: 60
 
-
 - pip:
     name: pysphere
-    extra_args: --trusted-host devpi.delphix.com -i http://devpi.delphix.com:3141/root/public/+simple/
+    extra_args: --index-url http://artifactory.delphix.com/artifactory/api/pypi/delphix-virtual-pypi/simple/ --trusted-host artifactory.delphix.com --no-cache-dir
     version: 0.1.8
-
-- pip:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - paramiko
-    - python-ldap
-    - requests
-  register: result
-  until: result is not failed
-  retries: 3
-  delay: 60
+    executable: pip2
 
 - git:
-    repo: "{{ item.repo }}"
-    dest:
-      "/opt/dcenter/lib/{{ item.dest }}"
-    version: "{{ item.version }}"
+    repo: 'https://gitlab.delphix.com/devops/dcenter-gate.git'
+    version: projects/dx4linux
+    dest: /opt/dcenter/lib/dcenter-gate
     accept_hostkey: yes
     update: no
-  with_items:
-    - { repo: 'https://gitlab.delphix.com/devops/dcenter-gate.git',
-        version: projects/dx4linux,
-        dest: dcenter-gate }
 
 - copy:
     dest: "/etc/dcenter.conf"
     content: |
       [[ -z "$DC_ROOT" ]] && export DC_ROOT="dcenter"
 
+#
+# By default, ubuntu restricts directories where dhcpd and named
+# can operate. For dcenter, we maintain the dhcp configuration
+# in /tmp so we need to add those paths into the apparmor configuration.
+#
 - copy:
     dest: "/etc/apparmor.d/local/usr.sbin.dhcpd"
     content: |
@@ -75,9 +68,8 @@
       /tmp/dcenter_dhcp_config/** r,
       /tmp/dcenter_dhcp_config/dhcpd{,6}.conf r,
       /tmp/dcenter_dhcp_config/dhcpd{,6}_ldap.conf r,
-
-       /tmp/dcenter_dhcp_config/dhcpd{,6}.leases* lrw,
-       /tmp/dcenter_dhcp_config/dhcpd{,6}.pid rw,
+      /tmp/dcenter_dhcp_config/dhcpd{,6}.leases* lrw,
+      /tmp/dcenter_dhcp_config/dhcpd{,6}.pid rw,
 
 - copy:
     dest: "/etc/apparmor.d/local/usr.sbin.named"
@@ -86,14 +78,14 @@
       /tmp/dcenter_dhcp_config/named.zone r,
       /tmp/dcenter_dhcp_config/named.pid w,
 
-- file:
-    path: /etc/resolv.conf
-    state: absent
-
+#
+# Dcenter systems are used with static addresses so we enable
+# preserving of the hostname.
+#
 - lineinfile:
     path: /etc/cloud/cloud.cfg
     regexp: '^preserve_hostname: false'
     line: 'preserve_hostname: true'
 
-- shell: |
+- command:
     systemctl disable bind9.service

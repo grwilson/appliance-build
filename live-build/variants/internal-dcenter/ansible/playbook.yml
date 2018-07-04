@@ -19,17 +19,9 @@
   connection: chroot
   gather_facts: no
   vars:
-    ansible_python_interpreter: /usr/bin/python2
+    ansible_python_interpreter: /usr/bin/python3
   roles:
     - appliance-build.minimal-common
     - appliance-build.minimal-internal
-    - appliance-build.install-delphix-zfs-packages
-    - appliance-build.zfsonlinux-development
-    - appliance-build.masking-common
-    - appliance-build.masking-development
-    - appliance-build.virtualization-common
-    - appliance-build.virtualization-internal
-    - appliance-build.virtualization-standard
-    - appliance-build.virtualization-development
-    - appliance-build.zfsonlinux-development
+    - appliance-build.delphix-ldap
     - appliance-build.dcenter
