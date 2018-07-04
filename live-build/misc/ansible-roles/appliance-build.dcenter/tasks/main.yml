@@ -79,8 +79,8 @@
       /tmp/dcenter_dhcp_config/named.pid w,
 
 #
-# Dcenter systems are used with static addresses so we enable
-# preserving of the hostname.
+# Dcenter systems use static addresses so modify cloud.cfg to preserve
+# their hostname.
 #
 - lineinfile:
     path: /etc/cloud/cloud.cfg

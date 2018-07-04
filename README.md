@@ -175,15 +175,15 @@ variant names use the "internal" and "external" prefixes:
 
 ### Step 2. Create and populate the ansible role directory
 
-The new variant that you're planning to create may need some additional
-customized roles. To do so you will need to create the role[s] that the
-variant needs to execute. These roles are located in the
-"live-build/misc/ansible-roles" directory and follow the ansible
-role directory structure (i.e. tasks, handlers, files, etc.)
+The new variant that was created may need some additional customized roles.
+To do so you will need to create the role[s] that the variant needs to
+execute. These roles are located in the "live-build/misc/ansible-roles"
+directory and follow the ansible role directory structure (i.e. tasks,
+handlers, files, etc.)
 
 Create a new directory or directories for the role[s] you will need
 for your variant. In this example, we will create "appliance-build.dcenter"
-to match the name of our variant that we plan to create:
+to match the name of our variant:
 
     $ mkdir -p live-build/misc/ansible-roles/appliance-build.dcenter/tasks
 
@@ -207,7 +207,7 @@ For this example, we add our new role to the playboodk as shown below:
       connection: chroot
       gather_facts: no
       vars:
-        ansible_python_interpreter: /usr/bin/python2
+        ansible_python_interpreter: /usr/bin/python3
       roles:
         - appliance-build.minimal-common
         - appliance-build.minimal-internal
