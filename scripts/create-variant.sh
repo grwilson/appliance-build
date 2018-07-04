@@ -37,7 +37,7 @@ if [[ $# -ne 1 ]]; then
 	exit 1
 fi
 
-if [[ "$1" = "internal-"[a-z]* || "$1" = "external-"[a-z]* ]]; then
+if [[ "$1" == "internal-"[a-z]* || "$1" == "external-"[a-z]* ]]; then
 
 	if [[ -d "$TOP/live-build/variants/$1" ]]; then
 		echo "variant specified ($1) already exists" 1>&2
@@ -46,10 +46,9 @@ if [[ "$1" = "internal-"[a-z]* || "$1" = "external-"[a-z]* ]]; then
 else
 	echo "Invalid variant naming convention: $1" 1>&2
 	echo "Variants must start with either 'internal-<name>'" \
-	    "or 'external-<name>'" 1>&2
-	exit 1	
+		"or 'external-<name>'" 1>&2
+	exit 1
 fi
-
 
 set -o errexit
 
@@ -60,7 +59,6 @@ mkdir -p "$TOP/live-build/variants/$1/config"
 cd "$TOP/live-build/variants/$1/ansible"
 ln -s ../../../misc/ansible-roles roles
 cp "$TOP/live-build/variants/$PLAYBOOK_VARIANT/ansible/playbook.yml" .
-
 
 cd "$TOP/live-build/variants/$1/config"
 ln -s ../../../misc/live-build-hooks hooks
