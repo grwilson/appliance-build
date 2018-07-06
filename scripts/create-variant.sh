@@ -18,7 +18,7 @@
 #
 # Default variant's playbook to use when creating the new variant
 #
-PLAYBOOK_VARIANT=internal-minimal
+EXAMPLE_VARIANT=internal-minimal
 
 TOP=$(git rev-parse --show-toplevel 2>/dev/null)
 
@@ -46,16 +46,17 @@ else
 fi
 
 set -o errexit
+set -o xtrace
 
 mkdir -p "$TOP/live-build/variants/$1"
 mkdir -p "$TOP/live-build/variants/$1/ansible"
 mkdir -p "$TOP/live-build/variants/$1/config"
 
-cd "$TOP/live-build/variants/$1/ansible"
-ln -s ../../../misc/ansible-roles roles
-cp "$TOP/live-build/variants/$PLAYBOOK_VARIANT/ansible/playbook.yml" .
+ln -s ../../../misc/ansible-roles "$TOP/live-build/variants/$1/ansible/roles"
+cp "$TOP/live-build/variants/$EXAMPLE_VARIANT/.gitignore" \
+	"$TOP/live-build/variants/$1/"
+cp "$TOP/live-build/variants/$EXAMPLE_VARIANT/ansible/playbook.yml" \
+	"$TOP/live-build/variants/$1/ansible"
 
-cd "$TOP/live-build/variants/$1/config"
-ln -s ../../../misc/live-build-hooks hooks
-
-git add "$TOP/live-build/variants/$1"
+ln -s ../../../misc/live-build-hooks  \
+	"$TOP/live-build/variants/$1/config/hooks"

@@ -87,5 +87,4 @@
     regexp: '^preserve_hostname: false'
     line: 'preserve_hostname: true'
 
-- command:
-    systemctl disable bind9.service
+- command: systemctl disable bind9.service

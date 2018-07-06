@@ -153,7 +153,7 @@ To exit "qemu", one can use "Ctrl-A X".
 ## Creating new build variants
 
 This repository contains different build variants which are used to
-generate customized images and leverage different ansible roles to customize
+generate customized images, leveraging different Ansible roles to customize
 those variants. The following instructions can be used to create a new
 build variant and roles.
 
@@ -175,19 +175,20 @@ variant names use the "internal" and "external" prefixes:
 
 ### Step 2. Create and populate the ansible role directory
 
-The new variant that was created may need some additional customized roles.
-To do so you will need to create the role[s] that the variant needs to
-execute. These roles are located in the "live-build/misc/ansible-roles"
-directory and follow the ansible role directory structure (i.e. tasks,
-handlers, files, etc.)
+The new variant that was just created may require some customizations applied
+to it, that are specific to this new variant. In order to apply these
+customization, a new Ansible role can be created and used. All existing Ansible
+roles that are used to customize existing build variants are located in the
+"live-build/misc/ansible-roles" directory, and follow the standard Ansible role
+directory structure (i.e. tasks, handlers, files, etc.)
 
-Create a new directory or directories for the role[s] you will need
-for your variant. In this example, we will create "appliance-build.dcenter"
-to match the name of our variant:
+To create a new Ansible role, a new Ansible role directory will need to be
+created. In this example, the name of our Ansible role will be
+"appliance-build.dcenter" to match the name of our variant:
 
     $ mkdir -p live-build/misc/ansible-roles/appliance-build.dcenter/tasks
 
-There are many roles that exist in "live-build/misc/ansible-roles" and can
+There are many roles that exist in "live-build/misc/ansible-roles" which can
 serve as good examples.
 
 ### Step 3. Update the variant configuration
@@ -215,6 +216,6 @@ For this example, we add our new role to the playboodk as shown below:
 
 ### Step 4. Build the variant
 
-See the instructions above to setup your build environment and kick off the
-build:
+See the instructions [above][#step-4-run-live-build) to setup your build
+environment and kick off the build:
     $ ./scripts/docker-run.sh make internal-dcenter
