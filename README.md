@@ -218,4 +218,5 @@ For this example, we add our new role to the playboodk as shown below:
 
 See the instructions [above](#step-4-run-live-build) to setup your build
 environment and kick off the build:
+
     $ ./scripts/docker-run.sh make internal-dcenter
