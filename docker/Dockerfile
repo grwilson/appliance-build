@@ -25,7 +25,7 @@ WORKDIR /root
 SHELL ["/bin/bash", "-c"]
 
 RUN \
-  echo "deb http://archive.ubuntu.com/ubuntu/ bionic-proposed restricted main multiverse universe" >> /etc/apt/sources.list
+  echo "deb http://archive.ubuntu.com/ubuntu/ bionic-proposed restricted main multiverse universe" >> /etc/apt/sources.list && \
   apt-get update && \
   apt-get install -y software-properties-common && \
   apt-add-repository -y ppa:ansible/ansible && \
